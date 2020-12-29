@@ -1,3 +1,4 @@
+const path = require('path');
 module.exports = {
   // モード値を production に設定すると最適化された状態で、
   // development に設定するとソースマップ有効でJSファイルが出力される
@@ -56,8 +57,13 @@ module.exports = {
   },
   // import 文で .ts や .tsx ファイルを解決するため
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".json"]
+    extensions: [".ts", ".tsx", ".js", ".json"],
+    alias: {
+      // import 文で components以下を絶対パスで呼ぶ
+      'components': path.resolve(__dirname, 'src/components')
+    }
   },
   // ES5(IE11等)向けの指定（webpack 5以上で必要）
   target: ["web", "es5"],
+
 };

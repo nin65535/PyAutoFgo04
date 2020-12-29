@@ -1,10 +1,17 @@
-import "bootstrap"
-import "@fortawesome/fontawesome-pro"
+// Bootstrap
+import 'bootstrap'
 
-import "./style.scss"
+// cssの読み込み
+import './style.scss'
+
+// FontAwesome
+import '@fortawesome/fontawesome-pro/js/fontawesome'
+import '@fortawesome/fontawesome-pro/js/all'
+
 
 import * as React from 'react'
 import { render } from 'react-dom'
 
-import {App} from './components/app'
-render(<App></App>,document.getElementById('app'))
+import {App} from 'components/app'
+
+render(<App/>,document.getElementById('app'))

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../data"
+		}
+	],
+	"settings": {
+		"python.linting.pylintArgs": [
+/*			"--extension-pkg-whitelist=eel",
+			"--ignored-classes = numpy",
+			"--extension-pkg-whitelist = numpy"
+*/		]
+	}
+}
