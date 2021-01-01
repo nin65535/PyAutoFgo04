@@ -3,23 +3,13 @@ import { eel } from '../eel.js'
 import { AppContext } from 'components/appContextProvider'
 
 export const Stages: React.FC = (props) => {
-    const { state, dispatcher } = React.useContext(AppContext)
-
-    const options = state.stages.map((stage, i) =>
-        (<option key={"stage-" + stage.label} value={i}>{stage.label}</option>))
-
-    const onChange = (event: React.ChangeEvent<HTMLSelectElement>) =>
-        dispatcher({ type: 'setCurrentStage', value: event.target.value })
+    const { state } = React.useContext(AppContext)
 
     const servants = state.stages[state.current_stage].servants.map((s, i) => <tr key={'servant-' + state.current_stage + '-' + i}><td>{s}</td></tr>)
 
     return (<>
-        <ReloadButton>
-            <select className='form-control' value={state.current_stage} onChange={onChange}>
-                {options}
-            </select>
-        </ReloadButton>
-        <table className="table table-sm table-bordered">
+        <StageSelector />
+        <table className="table table-sm">
             <tbody>
                 {servants}
             </tbody>
@@ -27,8 +17,24 @@ export const Stages: React.FC = (props) => {
     </>)
 }
 
-const ReloadButton: React.FC = ({ children }) => {
+export const StageSelector: React.FC = function () {
     const { state, dispatcher } = React.useContext(AppContext)
+
+    const options = state.stages.map((stage, i) =>
+        (<option key={"stage-" + stage.label} value={i}>{stage.label}</option>))
+
+    const onChange = (event: React.ChangeEvent<HTMLSelectElement>) =>
+        dispatcher({ type: 'setCurrentStage', value: Number(event.target.value) })
+
+    return < ReloadButton >
+        <select className='form-control' value={state.current_stage} onChange={onChange}>
+            {options}
+        </select>
+    </ReloadButton >
+}
+
+const ReloadButton: React.FC = ({ children }) => {
+    const { dispatcher } = React.useContext(AppContext)
     const [reload, setReload] = React.useState<boolean>(false)
     const disabled = reload ? ' disabled' : ''
 

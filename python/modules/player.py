@@ -1,3 +1,4 @@
+import re
 import weakref
 import time
 import eel
@@ -9,12 +10,14 @@ class PlayingStopException(Exception):
 
 
 class Player:
+
     def __init__(self, app):
         self._app = weakref.ref(app)
         self.click = app.window.click
         self.sleep = eel.sleep
         self.sleep_step = Config.read('player.sleep_step')
         self.stop_flg = False
+        self.log = app.log
 
     @property
     def app(self):
@@ -43,37 +46,40 @@ class Player:
         self.stop_flg = True
 
     def play(self, stage_no: int = 0, cmd_no: int = 0):
-        self.app.log('{:02d}-{:02d} :play start'.format(stage_no, cmd_no))
+        self.log('{:02d}-{:02d} :play start'.format(stage_no, cmd_no))
         self.stop_flg = False
 
-        '''
-        self.app.log('{:02d}-{:02d} :play start'.format(stage_no, cmd_no))
-
-        self.stop_flg = False
-        lines = self.app.stage.stages[stage_no]['commands'][cmd_no]
+        session = PlaySession(self, stage_no, cmd_no, 0)
 
         try:
-            for line_no, cmd in enumerate(lines):
-                label = '{:02d}-{:02d}-{:02d}'.format(
-                    stage_no, cmd_no, line_no)
-                self.app.log(label + ':' + cmd)
-                self.app.set_line(line_no)
-                self.step(cmd)
-                if(self.stop_flg):
+            for pos in session:
+                self.app.set_pos(
+                    pos['stage_no'], pos['cmd_no'], pos['line_no'])
+                log = '{stage_no:02d}-{cmd_no:02d}-{line_no:02d}:{cmd:s}'.format(
+                    **pos)
+                self.app.log(log)
+                self.step(pos["cmd"])
+
+                self.sleep(0)  # 別スレッドを走らせることでstopの割り込みを受け入れる
+
+                if self.stop_flg:
                     raise PlayingStopException()
 
         except PlayingStopException:
-            self.app.log('{:02d}-{:02d} :play stop'.format(stage_no, cmd_no))
+            self.log('{:02d}-{:02d} :play stop'.format(stage_no, cmd_no))
 
-        self.app.set_line(-1)
-        self.app.log('{:02d}-{:02d} :play end'.format(stage_no, cmd_no))
-        '''
+        self.log('{:02d}-{:02d} :play end'.format(stage_no, cmd_no))
+        eel.play_end(stage_no, cmd_no)  # pylint: disable=no-member
+        return
 
-        pass
+    def get_cmd(self,  stage_no: int = 0, cmd_no: int = 0, line_no: int = 0):
+        return self.app.stage.stages[stage_no]['commands'][cmd_no][line_no]
 
-    def step(self, stage_no: int = 0, cmd_no: int = 0, line_no: int = 0):
-        cmd = self.app.stage.stages[stage_no]['commands'][cmd_no][line_no]
-        eval('self.' + cmd)
+    def step(self, cmd):
+        if (cmd[0] == "#"):
+            self.log('control command:{}'.format(cmd))
+        else:
+            eval('self.' + cmd)
 
     def master_skill(self, i):
         self.wait_for()
@@ -102,3 +108,75 @@ class Player:
 
         if arg[0] == 'C':
             self.click('card', arg[1])
+
+
+class PlaySession:
+    is_goto = re.compile(r'#goto (\d+)')
+    is_call = re.compile(r'#call (\d+)')
+
+    # 進行管理用オブジェクト
+    def __init__(self, player, stage_no: int, cmd_no: int, line_no: int):
+        self._player: Player = weakref.ref(player)
+        self.stage_no: int = stage_no
+        self.cmd_no: int = cmd_no
+        self.line_no: int = line_no
+        self.call_stack = []
+
+    @property
+    def position(self):
+        return {
+            'stage_no': self.stage_no,
+            'cmd_no': self.cmd_no,
+            'line_no':  self.line_no,
+        }
+
+    @position.setter
+    def position(self, pos):
+        self.stage_no = pos['stage_no']
+        self.cmd_no = pos['cmd_no']
+        self.line_no = pos['line_no']
+
+    @property
+    def player(self):
+        return self._player()
+
+    @property
+    def app(self):
+        return self.player.app
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        while True:
+            try:
+                cmd = self.player.get_cmd(
+                    self.stage_no, self.cmd_no, self.line_no)
+                break
+            except IndexError:
+                if(len(self.call_stack) == 0):
+                    raise StopIteration()
+
+                pos = self.call_stack.pop()
+                self.position = pos
+
+        value = {
+            'stage_no': self.stage_no,
+            'cmd_no': self.cmd_no,
+            'line_no': self.line_no,
+            'cmd': cmd
+        }
+
+        if(type(self).is_goto.match(cmd)):
+            self.cmd_no = int(type(self).is_goto.findall(cmd)[0])
+            self.line_no = 0
+        elif(type(self).is_call.match(cmd)):
+            self.line_no += 1
+            self.call_stack.append(self.position)
+
+            self.cmd_no = int(type(self).is_call.findall(cmd)[0])
+            self.line_no = 0
+        else:
+            self.line_no += 1
+
+        return value

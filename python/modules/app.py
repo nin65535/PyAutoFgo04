@@ -39,17 +39,14 @@ class App:
     def stop() -> None:
         App._instance.player.stop()
 
-    def set_line(self, line: int) -> None:
-        if hasattr(eel, 'set_line'):
-            # pylint: disable=no-member        
-            eel.set_line(line)
+    def set_pos(self, stage_no: int, cmd_no: int, line_no: int) -> None:
+        if hasattr(eel, 'set_pos'):
+            eel.set_pos(stage_no, cmd_no, line_no)  # pylint: disable=no-member
         else:
-            print(line)
+            pass
 
     def log(self, msg: str) -> None:
         if hasattr(eel, 'log'):
-            # pylint: disable=no-member        
-            eel.log(msg)
+            eel.log(msg)  # pylint: disable=no-member
         else:
             print(msg)
-

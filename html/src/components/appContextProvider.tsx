@@ -33,8 +33,10 @@ const reducerSlices = {
         ({ ...state, current_command: value, current_line: 0 }) as State,
     setCurrentLine: (state: State, value: number) =>
         ({ ...state, current_line: value }) as State,
+    setPos: (state: State, [stage_no, cmd_no, line_no]: number[]) =>
+        ({ ...state, current_stage: stage_no, current_command: cmd_no, current_line: line_no }),
     addLog: (state: State, value: string) =>
-        ({ ...state, log: state.log + value + "\n"}) as State,
+        ({ ...state, log: state.log + value + "\n" }) as State,
     clearLog: (state: State, value: string) =>
         ({ ...state, log: '' }) as State,
     setPage: (state: State, value: number) =>
