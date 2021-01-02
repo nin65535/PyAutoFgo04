@@ -19,7 +19,7 @@
             "skill(5,'servant.2')",
             "skill(6)",
             "attack('N0','N2','C0')",
-            "#goto 2"
+            "log('end')"
         ],
         [
             "attack('N2','C0','C1')"

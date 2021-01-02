@@ -69,7 +69,7 @@ class Player:
             self.log('{:02d}-{:02d} :play stop'.format(stage_no, cmd_no))
 
         self.log('{:02d}-{:02d} :play end'.format(stage_no, cmd_no))
-        eel.play_end(stage_no, cmd_no)  # pylint: disable=no-member
+        self.app.play_end(stage_no, cmd_no)
         return
 
     def get_cmd(self,  stage_no: int = 0, cmd_no: int = 0, line_no: int = 0):

@@ -2,3 +2,4 @@
 /python/html
 /*.code-workspace
 /stages/*.json
+/python/debug.log

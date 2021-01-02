@@ -29,6 +29,7 @@ function set_pos(stage_no: number, cmd_no: number, line_no: number): void {
 const PYAUTOFGO_PLAY_END = 'pyautofgo-play-end'
 eel.expose(play_end)
 function play_end(stage_no: number, cmd_no: number): void {
+    console.log('play end called 01')
     const event = new CustomEvent(PYAUTOFGO_PLAY_END, { detail: [stage_no, cmd_no] });
     document.dispatchEvent(event)
 }
@@ -50,16 +51,12 @@ function AppMain(): JSX.Element {
         }
 
         const setPosListener = function (event) {
-            console.log("setpos called")
             dispatcher({ type: 'setPos', value: event.detail })
         }
 
         const playEndListener = function (event) {
             const [stage_no, cmd_no] = event.detail
-            dispatcher({ type: 'setCurrentStage', value: stage_no })
-            dispatcher({ type: 'setCurrentCommand', value: cmd_no })
-            
-
+            dispatcher({ type: 'setPos', value: [stage_no, cmd_no, 0] })
         }
 
         document.addEventListener(PYAUTOFGO_LOG, logListener)
@@ -69,6 +66,7 @@ function AppMain(): JSX.Element {
         return () => {//コンポーネント破棄時にイベントリスナ除去
             document.removeEventListener(PYAUTOFGO_LOG, logListener)
             document.removeEventListener(PYAUTOFGO_SET_POS, setPosListener)
+            document.removeEventListener(PYAUTOFGO_PLAY_END, playEndListener)
         }
     })
 

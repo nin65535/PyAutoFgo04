@@ -50,3 +50,10 @@ class App:
             eel.log(msg)  # pylint: disable=no-member
         else:
             print(msg)
+
+    def play_end(self, stage_no: int, cmd_no: int) -> None:
+        if hasattr(eel, 'play_end'):
+            eel.play_end(stage_no, cmd_no)  # pylint: disable=no-member
+        else:
+            print('play_end not found')
+
