@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { eel } from '../eel.js'
+import { EEL_PLAY_END, useEelEvent } from 'components/eelEvents'
 import { AppContext } from 'components/appContextProvider'
 import { NavSelector } from 'components/navSelector'
 import { StageSelector } from 'components/stages'
@@ -13,14 +14,30 @@ export const Commands: React.FC = function (props) {
 }
 
 const Console: React.FC = function () {
-    const { state } = React.useContext(AppContext)
-    const onPlay = () => eel.play(state.current_stage, state.current_command)
+    const { state, dispatcher } = React.useContext(AppContext)
+    const [isPlaying, setIsPlaying] = React.useState<boolean>(false)
+
+    const onPlay = () => {
+        eel.play(state.current_stage, state.current_command)
+        setIsPlaying(true)
+    }
+
     const onStop = () => eel.stop()
+
+    useEelEvent(EEL_PLAY_END, () => {
+        setIsPlaying(false)
+    })
+
+
+
+    const pClass: string = isPlaying ? 'btn-primary disabled' : 'btn-outline-primary'
+    const sClass: string = isPlaying ? '' : 'disabled'
+
     return <div className="my-2">
-        <button className="btn btn-outline-primary mr-2" onClick={onPlay}>
+        <button className={"btn mr-2 " + pClass} onClick={onPlay}>
             <i className="fas fa-play"></i>
         </button>
-        <button className="btn btn-outline-primary mr-2" onClick={onStop}>
+        <button className={"btn btn-outline-primary mr-2" + sClass} onClick={onStop}>
             <i className="fas fa-stop"></i>
         </button>
     </div>
