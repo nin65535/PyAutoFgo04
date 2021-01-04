@@ -4,12 +4,20 @@ import { EEL_PLAY_END, useEelEvent } from 'components/eelEvents'
 import { AppContext } from 'components/appContextProvider'
 import { NavSelector } from 'components/navSelector'
 import { StageSelector } from 'components/stages'
+import { Log } from 'components/log'
 export const Commands: React.FC = function (props) {
+    const style = {
+        height: "35rem",
+        overflow: "auto",
+    }
     return (<>
         <Console></Console>
         <StageSelector />
         <CommandSelector></CommandSelector>
-        <CommandList></CommandList>
+        <div style={style}>
+            <CommandList></CommandList>
+        </div>
+        <Log></Log>
     </>)
 }
 
@@ -28,8 +36,6 @@ const Console: React.FC = function () {
         setIsPlaying(false)
     })
 
-
-
     const pClass: string = isPlaying ? 'btn-primary disabled' : 'btn-outline-primary'
     const sClass: string = isPlaying ? '' : 'disabled'
 
@@ -37,7 +43,7 @@ const Console: React.FC = function () {
         <button className={"btn mr-2 " + pClass} onClick={onPlay}>
             <i className="fas fa-play"></i>
         </button>
-        <button className={"btn btn-outline-primary mr-2" + sClass} onClick={onStop}>
+        <button className={"btn btn-outline-primary mr-2 " + sClass} onClick={onStop}>
             <i className="fas fa-stop"></i>
         </button>
     </div>
